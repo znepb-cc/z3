@@ -110,7 +110,7 @@ term.setCursorPos(w / 2 - string.len("- - -") / 2, h / 2 + 1)
 term.setTextColor(colors.lightGray)
 print("\7 \7 \7")
 
-local files = {"/sys/kernel.lua"}
+local files = {"/lib/draw.lua", "/lib/nfte.lua", "/lib/scrollbox.lua"}
 
 for i, v in pairs(files) do
     if fs.exists(v) == false then
