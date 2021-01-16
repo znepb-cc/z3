@@ -2,12 +2,19 @@ local w, h = term.getSize()
 ccemux.echo("Kernel start")
 
 local function main()
-    local applications = {}
-    local mode = "menu"
-
+    -- Load APIs
     local drawing = require("/lib/draw")
+    local scrollbox = require("/lib/scrollbox")
 
+    -- Set up base system variables
+    local applications = {}
+    local native = term.current()
+    local mode = "menu"
     local applicationPosition = 0
+    local menuScroll = scrollbox:new(native, 2, h - 11, 13, 8, false)
+
+    -- Set up stuff related to base system variables
+    menuScroll:setBackgroundColor(colors.white)
 
     local function choose(p1, p2)
         if p1 == nil then
@@ -40,15 +47,29 @@ local function main()
         drawing.writeAt(drawing.alignRight(_ZOS_VERSION or "????", 1, w), h, _ZOS_VERSION or "????")
     end
 
+    local function setMenuHome()
+        menuScroll:clearElements()
+        menuScroll:addElement(menuScroll:createElement(colors.black, colors.white, "Z3", 1, 1))
+        menuScroll:addElement(menuScroll:createElement(colors.orange, colors.white, "\7", 11, 1, os.reboot))
+        menuScroll:addElement(menuScroll:createElement(colors.red, colors.white, "\7", 13, 1, os.shutdown))
+
+        menuScroll:addElement(menuScroll:createElement(colors.black, colors.white, "Pinned", 1, 3))
+        menuScroll:addElement(menuScroll:createElement(colors.gray, colors.white, "Shell", 1, 4))
+        menuScroll:addElement(menuScroll:createElement(colors.gray, colors.white, "Settings", 1, 5))
+        menuScroll:addElement(menuScroll:createElement(colors.gray, colors.white, "Type", 1, 6))
+        menuScroll:addElement(menuScroll:createElement(colors.gray, colors.white, "Store", 1, 6))
+
+        menuScroll:addElement(menuScroll:createElement(colors.black, colors.white, "Recent", 1, 8))
+        menuScroll:addElement(menuScroll:createElement(colors.gray, colors.white, "Nothing", 1, 9))
+    end
+
     local function drawMenu()
-        ccemux.echo("Menu")
         paintutils.drawFilledBox(1, h - 12, 15, h - 1, colors.white)
 
-        -- todo: finish lol
+        menuScroll:setVisiblity(true)
+        menuScroll:draw()
 
-        drawing.writeWithTextAndBgAt(colors.lightGray, colors.white, 2, h - 11, "Menu      \7 \7")
-
-        drawing.writeWithTextAndBgAt(colors.gray, colors.lightGray, 3, h - 2, "Search      ")
+        drawing.writeWithTextAndBgAt(colors.gray, colors.lightGray, 3, h - 2, "(nyi)      ")
         drawing.writeWithTextAndBgAt(colors.white, colors.lightGray, 2, h - 2, "\149")
         drawing.writeWithTextAndBgAt(colors.lightGray, colors.white, 14, h - 3, "\144")
         drawing.writeWithTextAndBgAt(colors.lightGray, colors.white, 14, h - 2, "\149")
@@ -67,11 +88,12 @@ local function main()
         drawDockbar()
     end
 
+    setMenuHome()
     draw()
 
     while true do
-        draw()
-        sleep() -- to provent oopsies
+        local e = {os.pullEventRaw()}
+        menuScroll:redirectEvents(e)
     end
 end
 
@@ -148,12 +170,12 @@ if result == false then
             sleep(0.05)
         end
     end
-    local ok, err = pcall(function() 
+    local ok, err = xpcall(function() 
         parallel.waitForAny(main, render) 
-    end)
-
-    if not ok then
-        ccemux.echo("STOP " .. err)
+    end, function(err)
+        term.redirect(term.native())
+        ccemux.echo("KSTOP " .. err)
+        ccemux.echo(debug.traceback())
         term.setBackgroundColor(colors.red)
         term.clear()
         term.setCursorPos(1, 1)
@@ -161,7 +183,7 @@ if result == false then
         sleep(0.5)
         os.pullEvent("key")
         os.reboot()
-    end  
+    end)
 else
     local ok, err = pcall(function()
         term.setTextColor(colors.white)
@@ -209,6 +231,8 @@ else
     end)
 
     if not ok then
+        ccemux.echo("BSTOP " .. err)
+        term.redirect(term.native())
         term.setBackgroundColor(colors.red)
         term.setTextColor(colors.white)
         term.clear()

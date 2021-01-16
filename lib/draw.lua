@@ -31,7 +31,7 @@ function a.writeWithBgAtRaw(bg, x, y, ...)
     return out
 end
 
-function a.writeWithTextAt(bg, x, y, ...)
+function a.writeWithTextAt(tc, x, y, ...)
     term.setCursorPos(x, y)
     term.setTextColor(tc)
     local out = write(unpack({...}))
