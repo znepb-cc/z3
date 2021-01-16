@@ -1,6 +1,6 @@
 local a = {}
 
-function a.setBackgroundAndTextColor(bg, tc)
+function a.setBgAndText(bg, tc)
     term.setBackgroundColor(bg)
     term.setTextColor(tc)
 end
@@ -47,14 +47,14 @@ end
 
 function a.writeWithTextAndBgAt(tc, bg, x, y, ...)
     term.setCursorPos(x, y)
-    a.setBackgroundAndTextColor(bg, tc)
+    a.setBgAndText(bg, tc)
     local out = write(unpack({...}))
     return out
 end
 
 function a.writeWithTextAndBgRaw(tc, bg, x, y, ...)
     term.setCursorPos(x, y)
-    a.setBackgroundAndTextColor(bg, tc)
+    a.setBgAndText(bg, tc)
     local out = term.write(unpack({...}))
     return out
 end
@@ -62,6 +62,16 @@ end
 function a.clearColor(bg)
     term.setBackgroundColor(bg)
     term.clear()
+end
+
+function a.clearLineColor(bg, y)
+    term.setCursorPos(1, y)
+    term.setBackgroundColor(bg)
+    term.clearLine()
+end
+
+function a.alignRight(str, offset, width)
+    return width - #str + offset
 end
 
 return a
