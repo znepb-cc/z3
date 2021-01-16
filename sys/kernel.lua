@@ -5,6 +5,8 @@ local function main()
     -- Load APIs
     local drawing = require("/lib/draw")
     local scrollbox = require("/lib/scrollbox")
+    local textbox = require("/lib/textbox")
+    local file = require("/lib/file")
 
     -- Set up base system variables
     local applications = {}
@@ -12,6 +14,7 @@ local function main()
     local mode = "menu"
     local applicationPosition = 0
     local menuScroll = scrollbox:new(native, 2, h - 11, 13, 8, false)
+    local searchText = textbox:new(native, 3, h - 2, 9, "Search...", nil, colors.gray, colors.lightGray, true)
 
     -- Set up stuff related to base system variables
     menuScroll:setBackgroundColor(colors.white)
@@ -61,15 +64,16 @@ local function main()
 
         menuScroll:addElement(menuScroll:createElement(colors.black, colors.white, "Recent", 1, 8))
         menuScroll:addElement(menuScroll:createElement(colors.gray, colors.white, "Nothing", 1, 9))
+
+        searchText:draw()
     end
 
     local function drawMenu()
         paintutils.drawFilledBox(1, h - 12, 15, h - 1, colors.white)
-
         menuScroll:setVisiblity(true)
         menuScroll:draw()
+        searchText:draw()
 
-        drawing.writeWithTextAndBgAt(colors.gray, colors.lightGray, 3, h - 2, "(nyi)      ")
         drawing.writeWithTextAndBgAt(colors.white, colors.lightGray, 2, h - 2, "\149")
         drawing.writeWithTextAndBgAt(colors.lightGray, colors.white, 14, h - 3, "\144")
         drawing.writeWithTextAndBgAt(colors.lightGray, colors.white, 14, h - 2, "\149")
@@ -94,6 +98,31 @@ local function main()
     while true do
         local e = {os.pullEventRaw()}
         menuScroll:redirectEvents(e)
+        searchText:redirectEvents(e)
+
+        if searchText.changed then
+            menuScroll:clearElements()
+            if searchText.content == "" then
+                setMenuHome()
+            else
+                menuScroll:addElement(menuScroll:createElement(colors.black, colors.white, "Results", 1, 1))
+
+                local searched = file.search(searchText.content, 20)
+
+                if #searched > 0 then
+                    for i, v in pairs(searched) do
+                        menuScroll:addElement(menuScroll:createElement(colors.black, colors.white, fs.getName(v), 1, i * 3))
+                        menuScroll:addElement(menuScroll:createElement(colors.gray, colors.white, v, 1, 1 + i * 3))
+                    end
+                else
+                    menuScroll:addElement(menuScroll:createElement(colors.lightGray, colors.white, "No results", 1, 3))
+                end
+            end
+        end
+
+        draw()
+
+        searchText:updateCursor()
     end
 end
 
@@ -110,7 +139,7 @@ term.setCursorPos(w / 2 - string.len("- - -") / 2, h / 2 + 1)
 term.setTextColor(colors.lightGray)
 print("\7 \7 \7")
 
-local files = {"/lib/draw.lua", "/lib/nfte.lua", "/lib/scrollbox.lua"}
+local files = {"/lib/draw.lua", "/lib/nfte.lua", "/lib/scrollbox.lua", "/lib/file.lua", "/lib/textbox.lua"}
 
 for i, v in pairs(files) do
     if fs.exists(v) == false then

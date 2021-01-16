@@ -9,7 +9,6 @@ local function updateMax(elements)
 end
 
 function a:new(parentTerm, x, y, w, h, visible)
-    ccemux.echo(debug.traceback())
     local win = window.create(parentTerm, x, y, w, h, visible)
     local o = {
         x = x,
@@ -81,7 +80,6 @@ function a:draw()
     for i, v in pairs(self.elements) do
 
         if v.y > self.scroll and v.y <= self.scroll + self.h then
-            ccemux.echo("in range")
             -- check if it is in bounds, otherwise don't bother drawing the element
             w.setBackgroundColor(v.backgroundColor)
             w.setTextColor(v.textColor)
