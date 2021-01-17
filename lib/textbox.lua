@@ -84,7 +84,6 @@ function a:redirectEvents(e)
             self.content = self.content:sub(1, self.cursor) .. e[2] .. self.content:sub(self.cursor + 1, #self.content)
         end
         self.cursor = self.cursor + 1
-        ccemux.echo(self.content)
         self:draw()
         self.changed = true
     elseif e[1] == "key" and self.selected then

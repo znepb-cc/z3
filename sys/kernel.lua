@@ -1,5 +1,4 @@
 local w, h = term.getSize()
-ccemux.echo("Kernel start")
 
 local function main()
     -- Load APIs
@@ -129,8 +128,6 @@ end
 term.setCursorBlink(false)
 term.setBackgroundColor(colors.black)
 term.clear()
-ccemux.echo("2")
-ccemux.echo("hello")
 term.setCursorPos(w / 2 - string.len("zOS 3") / 2, h / 2)
 term.setTextColor(colors.white)
 print("zOS 3")
@@ -203,8 +200,6 @@ if result == false then
         parallel.waitForAny(main, render) 
     end, function(err)
         term.redirect(term.native())
-        ccemux.echo("KSTOP " .. err)
-        ccemux.echo(debug.traceback())
         term.setBackgroundColor(colors.red)
         term.clear()
         term.setCursorPos(1, 1)
@@ -260,7 +255,6 @@ else
     end)
 
     if not ok then
-        ccemux.echo("BSTOP " .. err)
         term.redirect(term.native())
         term.setBackgroundColor(colors.red)
         term.setTextColor(colors.white)

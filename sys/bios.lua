@@ -155,7 +155,6 @@ function os.loadAPI(_sPath)
         local ok, err = pcall(fnAPI)
         if not ok then
             tAPIsLoading[sName] = nil
-            ccemux.echo(err)
             return error("Failed to load API " .. sName .. " due to " .. err, 1)
         end
     else
@@ -217,15 +216,10 @@ end
 
 printThenWait("Loaded: printError")
 
-for i, v in pairs(_G) do
-    ccemux.echo(i, v)
-end
-
 -- Load APIs
 local bAPIError = false
 local tApis = fs.list("rom/apis")
 for _, sFile in ipairs(tApis) do
-    ccemux.echo(sFile)
     if string.sub(sFile, 1, 1) ~= "." then
         local sPath = fs.combine("rom/apis", sFile)
         if not fs.isDir(sPath) then
@@ -331,21 +325,16 @@ for i, v in pairs(files) do
     end
 end
 
-ccemux.echo("test")
-
 if ok then
     print("Starting kernel")
     local ok, err = xpcall(function()
         os.run(_G, "/sys/kernel.lua")
     end, function(ok, err)
         if not ok then
-            ccemux.echo(tostring(err))
             term.setCursorPos(1, 1)
             term.setBackgroundColor(colors.black)
             term.setTextColor(colors.white)
             print("STOP:", err)
-            ccemux.echo(debug.traceback())
         end
     end)
-    
 end
